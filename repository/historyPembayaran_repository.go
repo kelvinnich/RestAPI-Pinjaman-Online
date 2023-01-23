@@ -41,11 +41,21 @@ func(db *historyPembayaranConnection)UpdateHistoryPembayaranRepository(id int, h
 }
 
 func(db *historyPembayaranConnection)GetAllHistoryPembayaranRepository()  ([]*model.HistoryPembayaran, error){
-	var history []*model.HistoryPembayaran
-	if err := db.db.Find(&history).Error; err != nil {
-		return nil,err
+	var historyPembayaran []*model.HistoryPembayaran
+	err := db.db.Table("history_pembayarans").
+			Select("history_pembayarans.*, pinjamans.nasabah_id, pembayarans.status_pembayaran").
+			Joins("JOIN pembayarans ON pembayarans.id = history_pembayarans.pembayaran_id").
+			Joins("JOIN pinjamans ON pinjamans.id = history_pembayarans.pinjaman_id").
+			Scan(&historyPembayaran).Error
+	if err != nil {
+			return nil, err
 	}
-	return history,nil
+	return historyPembayaran, nil
+	// var history []*model.HistoryPembayaran
+	// if err := db.db.Find(&history).Error; err != nil {
+	// 	return nil,err
+	// }
+	// return history,nil
 }
 
 func(db *historyPembayaranConnection)GetHistoryPembayaranByIdRepository(id int)(*model.HistoryPembayaran, error){
