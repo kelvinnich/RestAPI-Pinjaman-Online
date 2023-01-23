@@ -1,11 +1,11 @@
 package model
 
 type Pinjaman struct {
-	Id uint64 `gorm:"primary_key;auto_increment" json:"id"`
-	IDNasabah int` gorm:"not null " json:"-"`
+	Id uint64 `gorm:"primary_key;auto_increment;column:id" json:"id"`
+	IDNasabah uint64 `gorm:"not null" json:"-"`
 	Nasabah Nasabah `gorm:"foreignKey:IDNasabah;constraint:onUpdate:CASCADE,onDelete:CASCADE" json:"nasabah_id"`
-	Jumlah int` gorm:"type:integer" json:"jumlah"`
-	SukuBunga float32 `gorm:"type:float" json:"suku_bunga"`
+	Jumlah int `gorm:"type:integer" json:"jumlah"`
+	SukuBunga int `gorm:"type:integer" json:"suku_bunga"`
 	Durasi int `gorm:"type:integer" json:"durasi_peminjaman"`
-	StatusApproved bool `gorm:"type:boolean" json:"status_aproved"`
-	}
+	StatusApproved bool `gorm:"type:boolean" json:"status_approved"`
+}

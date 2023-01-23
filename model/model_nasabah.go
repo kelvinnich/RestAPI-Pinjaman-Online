@@ -9,5 +9,6 @@ type Nasabah struct {
 	Alamat string `gorm:"type:varchar(255)" json:"alamat"`
 	NoKtp string `gorm:"uniqueIndex;type:varchar(255)" json:"no_ktp"`
 	StatusVerified bool `gorm:"not null;default:false" json:"status_verified"`
+	Token  string  `gorm:"-" json:"token,omitempty"`
 	Pekerjaan Pekerjaan_nasabah `gorm:"foreignkey:NasabahID"`
 }
