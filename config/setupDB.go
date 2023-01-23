@@ -13,7 +13,7 @@ import (
 
 
 func ConnectDB() *gorm.DB{
-	errEnv := godotenv.Load(".env")
+	errEnv := godotenv.Load()
 	if errEnv != nil {
 		panic(errEnv)
 	}
