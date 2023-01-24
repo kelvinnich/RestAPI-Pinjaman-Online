@@ -50,6 +50,8 @@ func (c *authController) Login(ctx *gin.Context) {
 	response := helper.ResponseOK(true, "OK!", v)
 	ctx.JSON(http.StatusOK, response)
 	}
+
+	
 func (c *authController) Register(ctx *gin.Context) {
 	var registerDTO dto.RegisterNasabahDTO
 	errDTO := ctx.ShouldBind(&registerDTO)

@@ -12,7 +12,7 @@ import (
 
 type NasabahRepository interface{
 	CreateNasabah(nasabah *model.Master_Customer)(*model.Master_Customer, error)
-	UpdateNasabah(id uint64, nasabah model.Master_Customer) (model.Master_Customer,error)
+	UpdateNasabah(id uint64, nasabah *model.Master_Customer) (*model.Master_Customer,error)
 	VerifyCredential(email string, password string) interface{}
 	IsDuplicateEmail(email string) (tx *gorm.DB)
 	IsDuplicateNIk(noKtp string) (tx *gorm.DB)
@@ -38,19 +38,33 @@ func(db *nasabahConnection)CreateNasabah(nasabah *model.Master_Customer) (*model
 	return nasabah,nil
 }
 
-func(db *nasabahConnection)UpdateNasabah(id uint64,nasabah model.Master_Customer)( model.Master_Customer, error){
-	if nasabah.Password != ""{
-		nasabah.Password = HashPassword([]byte(nasabah.Password))
-	}else {
-		var nasabahTemp model.Master_Customer
-		db.db.Find(&nasabahTemp, nasabah.Id)
-		nasabah.Password = nasabahTemp.Password
+
+func (db *nasabahConnection) UpdateNasabah(id uint64, nasabah *model.Master_Customer) (*model.Master_Customer, error) {
+	var existingNasabah model.Master_Customer
+	if err := db.db.First(&existingNasabah, id).Error; err != nil {
+		return nil, err
 	}
-	if err := db.db.Model(&model.Master_Customer{}).Where("id = $1", id).Updates(nasabah).Error; err != nil {
-		panic(err)
+
+	if nasabah.Password != "" {
+		existingNasabah.Password = HashPassword([]byte(nasabah.Password))
+	} else {
+		existingNasabah.Password = nasabah.Password
 	}
-	return nasabah,nil
+
+	existingNasabah.Name = nasabah.Name
+	existingNasabah.Email = nasabah.Email
+	existingNasabah.NoKtp = nasabah.NoKtp
+	existingNasabah.PhoneNumber = nasabah.PhoneNumber
+	existingNasabah.Address = nasabah.Address
+
+
+	if err := db.db.Save(&existingNasabah).Error; err != nil {
+		return nil, err
+	}
+
+	return &existingNasabah, nil
 }
+
 
 func(db *nasabahConnection)VerifyCredential(email string, password string) interface{}{
 	var nasabah model.Master_Customer

@@ -11,7 +11,7 @@ import (
 
 
 type NasabahServic interface{
-	UpdateNasabah(nasabah dto.UpdateNasabahDTO)model.Master_Customer
+	UpdateNasabah(nasabah dto.UpdateNasabahDTO) *model.Master_Customer
 	ProfileNasabah(nasabahId string)model.Master_Customer
 }
 
@@ -26,13 +26,13 @@ func NewNasabahService(nasabahRepo repository.NasabahRepository)NasabahServic{
 }
 
 
-func(s *nasabahService)UpdateNasabah(nasabah dto.UpdateNasabahDTO)model.Master_Customer{
-	NewNasabah := model.Master_Customer{}
-	err := smapping.FillStruct(&NewNasabah, smapping.MapFields(nasabah))
+func(s *nasabahService)UpdateNasabah(nasabah dto.UpdateNasabahDTO) *model.Master_Customer{
+	var NewNasabah model.Master_Customer
+	err := smapping.FillStruct(&NewNasabah, smapping.MapFields(&nasabah))
 	if err != nil {
-		log.Println("Error map %v", err)
+			log.Println("Error map %v", err)
 	}
-	update,_ := s.nasabahRepository.UpdateNasabah(nasabah.Id, NewNasabah)
+	update,_ := s.nasabahRepository.UpdateNasabah(NewNasabah.Id, &NewNasabah)
 	return update
 }
 

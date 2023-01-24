@@ -13,24 +13,24 @@ import (
 )
 
 
-type CustomerController interface {
+type NasabahController interface {
 	UpdateNasabahController(context *gin.Context)
 	ProfileNasabahController(context *gin.Context)
 }
 
-type customerController struct {
+type nasabahController struct {
 	nasabahService service.NasabahServic
 	jwtService      service.JwtService
 }
 
-func NewCustomerController(nasabahservice service.NasabahServic, jwtService service.JwtService) CustomerController {
-	return &customerController{
+func NewNasabahController(nasabahservice service.NasabahServic, jwtService service.JwtService) NasabahController {
+	return &nasabahController{
 		nasabahService: nasabahservice,
 		jwtService:      jwtService,
 	}
 }
 
-func (c *customerController) UpdateNasabahController(context *gin.Context) {
+func (c *nasabahController) UpdateNasabahController(context *gin.Context) {
 	var customerUpdateDTO dto.UpdateNasabahDTO
 	err := context.ShouldBind(&customerUpdateDTO)
 	if err != nil {
@@ -50,12 +50,12 @@ func (c *customerController) UpdateNasabahController(context *gin.Context) {
 		panic(err.Error())
 	}
 	customerUpdateDTO.Id = id
-	customer := c.customerService.UpdateNasabah(customerUpdateDTO)
+	customer := c.nasabahService.UpdateNasabah(customerUpdateDTO)
 	response := helper.ResponseOK(true, "OK!", customer)
 	context.JSON(http.StatusOK, response)
 }
 
-func (c *customerController) ProfileNasabahController(context *gin.Context) {
+func (c *nasabahController) ProfileNasabahController(context *gin.Context) {
 	authHeader := context.GetHeader("Authorization")
 	token, errToken := c.jwtService.ValidateTokenService(authHeader)
 	if errToken != nil {
@@ -63,7 +63,7 @@ func (c *customerController) ProfileNasabahController(context *gin.Context) {
 	}
 	claims := token.Claims.(jwt.MapClaims)
 	id := fmt.Sprintf("%v", claims["customer_id"])
-	customer := c.customerService.ProfileNasabah(id)
+	customer := c.nasabahService.ProfileNasabah(id)
 	res := helper.ResponseOK(true, "OK!", customer)
 	context.JSON(http.StatusOK, res)
 }
