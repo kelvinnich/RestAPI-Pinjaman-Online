@@ -4,14 +4,14 @@ import "time"
 
 
 type CreateHistoryPembayaranDTO struct {
-	Pinjaman_id int `json:"pinjaman_id" form:"pinjaman_id" binding:"required"`
-	IDPembayaran int `json:"pembayaran_id" form:"pembayaran_id" binding:"required"`
-	Tanggal time.Time `json:"tanggal" form:"tanggal" binding:"required"`
+	Loan_id int `json:"loan_id" form:"loan_id" binding:"required"`
+	payment_id int `json:"payment_id" form:"payment_id" binding:"required"`
+	Date time.Time `json:"date" form:"date" binding:"required"`
 }
 
 type UpdateHistoryPembayaranDTO struct {
 	Id uint64 `json:"id" form:"id"`
-	Pinjaman_id int `json:"pinjaman_id" form:"pinjaman_id" binding:"required"`
-	IDPembayaran int `json:"pembayaran_id" form:"pembayaran_id" binding:"required"`
-	Tanggal time.Time `json:"tanggal" form:"tanggal" binding:"required"`
+	Loan_id int `json:"loan_id" form:"loan_id" binding:"required"`
+	payment_id int `json:"payment_id" form:"payment_id" binding:"required"`
+	Date time.Time `json:"date" form:"date" binding:"required"`
 }
