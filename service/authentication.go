@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"log"
 	"pinjaman-online/dto"
 	"pinjaman-online/model"
 	"pinjaman-online/repository"
@@ -13,11 +12,11 @@ import (
 
 
 type AuthenticationService interface{
-	CreateNasabah(nasabah dto.RegisterNasabahDTO) model.Nasabah
+	CreateNasabah(nasabah dto.RegisterNasabahDTO) *model.Master_Customer
 	VerifyCredential(email string, password string) interface{}
 	IsDuplicateEmail(email string) bool
 	IsDuplicateNIk(noKtp string) bool
-	FindByNIK(nik string)model.Nasabah
+	FindByNIK(nik string)model.Master_Customer
 }
 
 type authenticationService struct{
@@ -30,28 +29,29 @@ func NewAuthenticationService(nasabah repository.NasabahRepository)Authenticatio
 	}
 }
 
-func(s *authenticationService) CreateNasabah(nasabah dto.RegisterNasabahDTO) model.Nasabah{
-	NewNasabah := model.Nasabah{}
+func(s *authenticationService) CreateNasabah(nasabah dto.RegisterNasabahDTO) *model.Master_Customer{
+	NewNasabah := model.Master_Customer{}
 	err := smapping.FillStruct(&NewNasabah, smapping.MapFields(nasabah))
 	if err != nil {
 		fmt.Errorf("Error map %v", err)
 	}
 
-	response,_ := s.nasabahRepository.CreateNasabah(NewNasabah)
+	response,_ := s.nasabahRepository.CreateNasabah(&NewNasabah)
 	return response
 }
 
+
 func(s *authenticationService)VerifyCredential(email string, password string) interface{}{
 	response := s.nasabahRepository.VerifyCredential(email, password)
-	if v, ok := response.(model.Nasabah); ok{
-		comparePassword := hashAndComparePassword(v.Password, []byte(password))
-		if v.Email == email && comparePassword{
-			return response
-		}
-		return false
+	if v, ok := response.(model.Master_Customer); ok{
+	comparePassword := bcrypt.CompareHashAndPassword([]byte(v.Password), []byte(password))
+	if v.Email == email && comparePassword == nil{
+	return response
+	}
+	return false
 	}
 	return nil
-}
+	}
 
 func(s *authenticationService) IsDuplicateEmail(email string) bool{
 	response := s.nasabahRepository.IsDuplicateEmail(email)
@@ -63,16 +63,6 @@ func(s *authenticationService) IsDuplicateNIk(noKtp string) bool{
 	return !(response.Error == nil)
 }
 
-func(s *authenticationService)FindByNIK(nik string)model.Nasabah{
+func(s *authenticationService)FindByNIK(nik string)model.Master_Customer{
 	return s.nasabahRepository.FindByNIK(nik)
-}
-
-func hashAndComparePassword(hashPassword string, planPassword []byte)bool{
-	hash := []byte(hashPassword)
-	err := bcrypt.CompareHashAndPassword(hash, planPassword)
-	if err != nil {
-		log.Println(err)
-		return false
-	}
-	return true
 }

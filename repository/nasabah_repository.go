@@ -1,6 +1,7 @@
 package repository
 
 import (
+
 	"log"
 	"pinjaman-online/model"
 
@@ -10,7 +11,7 @@ import (
 
 
 type NasabahRepository interface{
-	CreateNasabah(nasabah model.Master_Customer)(model.Master_Customer, error)
+	CreateNasabah(nasabah *model.Master_Customer)(*model.Master_Customer, error)
 	UpdateNasabah(id int, nasabah model.Master_Customer) (model.Master_Customer,error)
 	VerifyCredential(email string, password string) interface{}
 	IsDuplicateEmail(email string) (tx *gorm.DB)
@@ -29,7 +30,7 @@ func NewNasabahRepository(db *gorm.DB) NasabahRepository{
 	}
 }
 
-func(db *nasabahConnection)CreateNasabah(nasabah model.Master_Customer) (model.Master_Customer, error){
+func(db *nasabahConnection)CreateNasabah(nasabah *model.Master_Customer) (*model.Master_Customer, error){
 	nasabah.Password = HashPassword([]byte(nasabah.Password))
 	if err := db.db.Create(nasabah).Error; err != nil{
 		panic(err)
@@ -54,11 +55,19 @@ func(db *nasabahConnection)UpdateNasabah(id int,nasabah model.Master_Customer)( 
 func(db *nasabahConnection)VerifyCredential(email string, password string) interface{}{
 	var nasabah model.Master_Customer
 	res := db.db.Where("email = $1", email).Take(&nasabah)
-	if res.Error == nil {
-		return res
+	if res.Error != nil {
+		return nil
 	}
-	return nil
+
+	if err := bcrypt.CompareHashAndPassword([]byte(nasabah.Password), []byte(password)); err != nil {
+		if err == bcrypt.ErrMismatchedHashAndPassword {
+			return nil
+		}
+		return nil
+	}
+	return nasabah
 }
+
 
 func(db *nasabahConnection)IsDuplicateEmail(email string) (dB *gorm.DB){
 	var nasabah model.Master_Customer

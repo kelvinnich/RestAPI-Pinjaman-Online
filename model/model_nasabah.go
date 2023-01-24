@@ -2,7 +2,7 @@ package model
 
 type Master_Customer struct {
 	Id uint64 `gorm:"primary_key;auto_increment" json:"id"`
-	Name string `gorm:"type:varchar(255)" json:"Name"`
+	Name string `gorm:"type:varchar(255)" json:"name"`
 	Email string `gorm:"uniqueIndex;type:varchar(255)" json:"email"`
 	Password string `gorm:"type:varchar(255)" json:"-"`
 	PhoneNumber string `gorm:"type:varchar(255)" json:"phone_number"`

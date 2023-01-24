@@ -18,12 +18,11 @@ type AuthController interface {
 }
 
 type authController struct {
-	// masukkan service yang kalian butuh
+	
 	authService service.AuthenticationService
 	jwtService service.JwtService
 }
 
-// NewAuthController membuat instance baru dari AuthController
 func NewAuthController(authService service.AuthenticationService, jwtService service.JwtService) AuthController {
 	return &authController{
 		authService: authService,
@@ -35,22 +34,22 @@ func (c *authController) Login(ctx *gin.Context) {
 	var loginDTO dto.LoginNasabahDTO
 	errDTO := ctx.ShouldBind(&loginDTO)
 	if errDTO != nil {
-		response := helper.ErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObject{})
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
-		return
+	response := helper.ErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObject{})
+	ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+	return
 	}
 	authResult := c.authService.VerifyCredential(loginDTO.Email, loginDTO.Password)
-	if v, ok := authResult.(model.Nasabah); ok {
-		generatedToken := c.jwtService.GenerateTokenService(strconv.FormatUint(v.Id, 10))
-		v.Token = generatedToken
-		response := helper.ResponseOK(true, "OK!", v)
-		ctx.JSON(http.StatusOK, response)
-		return
-	}
+	if authResult == nil {
 	response := helper.ErrorResponse("Please check again your credential", "Invalid Credential", helper.EmptyObject{})
 	ctx.AbortWithStatusJSON(http.StatusUnauthorized, response)
-}
-
+	return
+	}
+	v := authResult.(model.Master_Customer)
+	generatedToken := c.jwtService.GenerateTokenService(strconv.FormatUint(v.Id, 10))
+	v.Token = generatedToken
+	response := helper.ResponseOK(true, "OK!", v)
+	ctx.JSON(http.StatusOK, response)
+	}
 func (c *authController) Register(ctx *gin.Context) {
 	var registerDTO dto.RegisterNasabahDTO
 	errDTO := ctx.ShouldBind(&registerDTO)
