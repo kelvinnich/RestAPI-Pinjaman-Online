@@ -32,7 +32,7 @@ func ConnectDB() *gorm.DB{
 	}
 	
 
-  db.AutoMigrate(&model.Nasabah{}, &model.Dokumen_nasabah{}, &model.Pinjaman{}, &model.Pembayaran{}, &model.HistoryPembayaran{}, &model.Pekerjaan_nasabah{} )
+  db.AutoMigrate(&model.Master_Customer{}, &model.Master_Document_Customer{}, &model.Master_Loan{}, &model.Transactions_Payment_Loan{}, &model.Master_Payment_History{}, &model.Master_Jobs_customers{} )
 
 
 	return db

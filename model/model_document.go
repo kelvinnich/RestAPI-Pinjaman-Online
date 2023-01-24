@@ -1,9 +1,9 @@
 package model
 
-type Dokumen_nasabah struct {
+type Master_Document_Customer struct {
 	Id uint64 `gorm:"primary_key;auto_increment" json:"id"`
-	IdNasabah uint `gorm:"not null " json:"-"`
-	Nasabah_id Nasabah `gorm:"foreignKey:IdNasabah;constraint:onUpdate:CASCADE,onDelete:CASCADE" json:"nasabah_id"`
-	JenisDokumen string `gorm:"type:varchar(255)" json:"jenis_dokumen"`
+	Id_Customer uint `gorm:"not null " json:"-"`
+	Customer_Id Master_Customer `gorm:"foreignKey:Id_Customer;constraint:onUpdate:CASCADE,onDelete:CASCADE" json:"customer_id"`
+	DocumentType string `gorm:"type:varchar(255)" json:"document_type"`
 	FilePath string `gorm:"type:varchar(255)" json:"file_path"`
 }

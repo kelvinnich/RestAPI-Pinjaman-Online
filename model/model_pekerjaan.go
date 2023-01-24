@@ -2,10 +2,10 @@ package model
 
 import "time"
 
-type Pekerjaan_nasabah struct {
+type Master_Jobs_customers struct {
 	ID         int `gorm:"primary_key;auto_increment" json:"id"`
-	NasabahID  int ` gorm:"not null " json:"-"`
-	AlamatPerusahaan string `gorm:"type:varchar(255)" json:"alamat_perusahaan"`
-	TanggalGajian time.Time `gorm:"type:timestamp" json:"tanggal_gajian"`
-	PosisiPekerjaan string `gorm:"type:varchar(255)" json:"posisi_perkerjaan"`
+	Customer_Id  int ` gorm:"not null " json:"-"`
+	Company_Address string `gorm:"type:varchar(255)" json:"company_address"`
+	Payday_Date time.Time `gorm:"type:timestamp" json:"payDay_date"`
+	Job_Position string `gorm:"type:varchar(255)" json:"job_position"`
 }

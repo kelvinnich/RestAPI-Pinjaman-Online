@@ -8,9 +8,9 @@ import (
 
 
 type PinjamanRepository interface{
-	CreatePinjamanRepository(pinjaman *model.Pinjaman) error
-	UpdatePinjamanRepository(id int, pinjaman *model.Pinjaman)error
-	SearchPinjamanByIdRepository(id int) (*model.Pinjaman, error)
+	CreatePinjamanRepository(pinjaman *model.Master_Loan) error
+	UpdatePinjamanRepository(id int, pinjaman *model.Master_Loan)error
+	SearchPinjamanByIdRepository(id int) (*model.Master_Loan, error)
 	DeletePinjamanRepository(id int)error
 	GetTotalPembayaranNasabah(nasabahID int) (int, error)
 }
@@ -25,22 +25,22 @@ func NewPinjamanRepository(db *gorm.DB)PinjamanRepository{
 	}
 }
 
-func(db *pinjamanConnection)CreatePinjamanRepository(pinjaman *model.Pinjaman)error{
+func(db *pinjamanConnection)CreatePinjamanRepository(pinjaman *model.Master_Loan)error{
 	if err := db.db.Create(pinjaman).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func(db *pinjamanConnection)UpdatePinjamanRepository(id int, pinjaman *model.Pinjaman)error{
-	if err := db.db.Model(model.Pinjaman{}).Where("id = $1").Updates(pinjaman).Error; err != nil {
+func(db *pinjamanConnection)UpdatePinjamanRepository(id int, pinjaman *model.Master_Loan)error{
+	if err := db.db.Model(model.Master_Loan{}).Where("id = $1").Updates(pinjaman).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func(db *pinjamanConnection)SearchPinjamanByIdRepository(id int) (*model.Pinjaman, error){
-	var pinjaman model.Pinjaman
+func(db *pinjamanConnection)SearchPinjamanByIdRepository(id int) (*model.Master_Loan, error){
+	var pinjaman model.Master_Loan
 	if err := db.db.First(&pinjaman, id).Error; err != nil{
 		return nil,err
 	}
@@ -49,7 +49,7 @@ func(db *pinjamanConnection)SearchPinjamanByIdRepository(id int) (*model.Pinjama
 }
 
 func(db *pinjamanConnection)DeletePinjamanRepository(id int)error{
-	if err := db.db.Where("id = $1", id).Delete(&model.Pinjaman{}).Error; err != nil{
+	if err := db.db.Where("id = $1", id).Delete(&model.Master_Loan{}).Error; err != nil{
 		return err
 	}
 
@@ -57,13 +57,13 @@ func(db *pinjamanConnection)DeletePinjamanRepository(id int)error{
 }
 
 func (db *pinjamanConnection) GetTotalPembayaranNasabah(nasabahID int) (int, error) {
-	var pinjaman model.Pinjaman
-	if err := db.db.Where("nasabah_id = $1", nasabahID).Find(&pinjaman).Error; err != nil {
+	var pinjaman model.Master_Loan
+	if err := db.db.Where("customer_id = $1", nasabahID).Find(&pinjaman).Error; err != nil {
 			return 0, err
 	}
-	jumlahPinjaman := pinjaman.Jumlah
-	sukuBunga := pinjaman.SukuBunga
-	durasiPinjaman := pinjaman.Durasi
+	jumlahPinjaman := pinjaman.Amount
+	sukuBunga := pinjaman.Loan_Interest_Rates
+	durasiPinjaman := pinjaman.Loan_Duration
 	pembayaranPerBulan := (jumlahPinjaman * sukuBunga) / (12 * 100) + (jumlahPinjaman / durasiPinjaman)
 	totalPembayaran := pembayaranPerBulan * durasiPinjaman
 	return totalPembayaran, nil

@@ -8,11 +8,11 @@ import (
 )
 
 type PembayaranRepository interface {
-	CreatePembayaranRepository(pembayaran *model.Pembayaran) error
-	FindByIdRepository(id int) (*model.Pembayaran, error)
-	UpdatePembayaranRepository(id int, pembayaran *model.Pembayaran) error
+	CreatePembayaranRepository(pembayaran *model.Transactions_Payment_Loan) error
+	FindByIdRepository(id int) (*model.Transactions_Payment_Loan, error)
+	UpdatePembayaranRepository(id int, pembayaran *model.Transactions_Payment_Loan) error
 	DeletePembayaranRepository(id int) error
-	ListPembayaranRepository() ([]*model.Pembayaran, error)
+	ListPembayaranRepository() ([]*model.Transactions_Payment_Loan, error)
 	GetPembayaranPerBulanRepository(pinjamanID int) (int, error)
 	GetTotalPembayaranRepository(pinjamanID int) (int, error)
 	GetJatuhTempoPembayaranRepository(pinjamanID int) ([]time.Time, error)
@@ -29,7 +29,7 @@ func NewPembayaranRepository(db *gorm.DB)PembayaranRepository{
 	}
 }
 
-func(db *pembayaranConnection)CreatePembayaranRepository(pembayaran *model.Pembayaran) error{
+func(db *pembayaranConnection)CreatePembayaranRepository(pembayaran *model.Transactions_Payment_Loan) error{
 	if err := db.db.Create(pembayaran).Error; err != nil {
 		return err
 	}
@@ -41,8 +41,8 @@ func(db *pembayaranConnection)CreatePembayaranRepository(pembayaran *model.Pemba
 	return nil
 }
 
-func(db *pembayaranConnection )UpdatePembayaranRepository(id int, pembayaran *model.Pembayaran) error{
-	if err := db.db.Model(&model.Pembayaran{}).Where("id = $1", id).Updates(pembayaran).Error; err != nil {
+func(db *pembayaranConnection )UpdatePembayaranRepository(id int, pembayaran *model.Transactions_Payment_Loan) error{
+	if err := db.db.Model(&model.Transactions_Payment_Loan{}).Where("id = $1", id).Updates(pembayaran).Error; err != nil {
 		return err
 	}
 
@@ -53,8 +53,8 @@ func(db *pembayaranConnection )UpdatePembayaranRepository(id int, pembayaran *mo
 	return nil
 }
 
-func(db *pembayaranConnection)FindByIdRepository(id int) (*model.Pembayaran, error){
-	var pembayaran model.Pembayaran
+func(db *pembayaranConnection)FindByIdRepository(id int) (*model.Transactions_Payment_Loan, error){
+	var pembayaran model.Transactions_Payment_Loan
 	if err := db.db.First(&pembayaran, id).Error; err != nil {
 		return nil,err
 	}
@@ -63,14 +63,14 @@ func(db *pembayaranConnection)FindByIdRepository(id int) (*model.Pembayaran, err
 }
 
 func(db *pembayaranConnection)DeletePembayaranRepository(id int) error{
-	if err := db.db.Where("id = $1", id).Delete(&model.Pembayaran{}).Error; err != nil {
+	if err := db.db.Where("id = $1", id).Delete(&model.Transactions_Payment_Loan{}).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func(db *pembayaranConnection)ListPembayaranRepository() ([]*model.Pembayaran, error){
-    var pembayarans []*model.Pembayaran
+func(db *pembayaranConnection)ListPembayaranRepository() ([]*model.Transactions_Payment_Loan, error){
+    var pembayarans []*model.Transactions_Payment_Loan
     if err := db.db.Find(&pembayarans).Error; err != nil {
         return nil, err
     }
@@ -78,45 +78,45 @@ func(db *pembayaranConnection)ListPembayaranRepository() ([]*model.Pembayaran, e
 }
 
 func (db *pembayaranConnection) GetPembayaranPerBulanRepository(pinjamanID int) (int, error) {
-	var pinjaman model.Pinjaman
+	var pinjaman model.Master_Loan
 	if err := db.db.First(&pinjaman, pinjamanID).Error; err != nil {
 			return 0, err
 	}
-	jumlahPinjaman := pinjaman.Jumlah
-	sukuBunga := pinjaman.SukuBunga
-	durasiPinjaman := pinjaman.Durasi
+	jumlahPinjaman := pinjaman.Amount
+	sukuBunga := pinjaman.Loan_Interest_Rates
+	durasiPinjaman := pinjaman.Loan_Duration
 	pembayaranPerBulan := (jumlahPinjaman * sukuBunga) / (12 * 100) + (jumlahPinjaman / durasiPinjaman)
 	return pembayaranPerBulan, nil
 }
 
 func (db *pembayaranConnection) GetTotalPembayaranRepository(pinjamanID int) (int, error) {
-	var pinjaman model.Pinjaman
+	var pinjaman model.Master_Loan
 	if err := db.db.First(&pinjaman, pinjamanID).Error; err != nil {
 	return 0, err
 	}
-	jumlahPinjaman := pinjaman.Jumlah
-	sukuBunga := pinjaman.SukuBunga
-	durasiPinjaman := pinjaman.Durasi
+	jumlahPinjaman := pinjaman.Amount
+	sukuBunga := pinjaman.Loan_Interest_Rates
+	durasiPinjaman := pinjaman.Loan_Duration
 	pembayaranPerBulan := (jumlahPinjaman * sukuBunga) / (12 * 100) + (jumlahPinjaman / durasiPinjaman)
 	totalPembayaran := pembayaranPerBulan * durasiPinjaman
 	return totalPembayaran, nil
 	}
 
 func (db *pembayaranConnection) GetJatuhTempoPembayaranRepository(pinjamanID int) ([]time.Time, error) {
-    var pembayarans []*model.Pembayaran
+    var pembayarans []*model.Transactions_Payment_Loan
     var jatuhTempo []time.Time
-    var pinjaman model.Pinjaman
+    var pinjaman model.Master_Loan
 
     if err := db.db.First(&pinjaman, pinjamanID).Error; err != nil {
         return nil, err
     }
 
-    if err := db.db.Where("pinjaman_id = $1", pinjamanID).Find(&pembayarans).Error; err != nil {
+    if err := db.db.Where("loan_id = $1", pinjamanID).Find(&pembayarans).Error; err != nil {
         return nil, err
     }
 
     for _, pembayaran := range pembayarans {
-        jatuhTempo = append(jatuhTempo, pembayaran.Tanggal_Pembayaran.AddDate(0, int(pinjaman.Durasi), 0))
+        jatuhTempo = append(jatuhTempo, pembayaran.Payment_Date.AddDate(0, int(pinjaman.Loan_Duration), 0))
     }
 
     return jatuhTempo, nil
@@ -126,11 +126,11 @@ func(db *pembayaranConnection) init() error {
 
 	triggerSQL := `
 	CREATE TRIGGER update_payment_status
-	AFTER INSERT ON pembayarans
+	AFTER INSERT ON Transactions_payment_loans
 	FOR EACH ROW
 	BEGIN
-	UPDATE pembayarans
-	SET status_pembayaran = true
+	UPDATE Transactions_payment_loans
+	SET Payment_Status = true
 	WHERE id = NEW.id;
 	END;
 	`
