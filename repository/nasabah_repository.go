@@ -15,7 +15,7 @@ type NasabahRepository interface{
 	VerifyCredential(email string, password string) interface{}
 	IsDuplicateEmail(email string) (tx *gorm.DB)
 	IsDuplicateNIk(noKtp string) (tx *gorm.DB)
-	FindByEmail(email string) model.Nasabah
+	FindByNIK(NIK string) model.Nasabah
 	ProfileNasabah(nasabahID string) model.Nasabah
 }
 
@@ -70,9 +70,9 @@ func(db *nasabahConnection)IsDuplicateNIk(noKtp string) (dB *gorm.DB){
 	return db.db.Where("noKtp = $1", noKtp).Take(&nasabah)
 }
 
-func(db *nasabahConnection)FindByEmail(email string) model.Nasabah{
+func(db *nasabahConnection)FindByNIK(nik string) model.Nasabah{
 	var nasabah model.Nasabah
-	db.db.Where("email = $1", email).Take(&nasabah)
+	db.db.Where("no_ktp = $1", nik).Take(&nasabah)
 	return nasabah
 }
 
