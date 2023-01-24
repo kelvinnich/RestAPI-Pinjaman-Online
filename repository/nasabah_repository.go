@@ -12,7 +12,7 @@ import (
 
 type NasabahRepository interface{
 	CreateNasabah(nasabah *model.Master_Customer)(*model.Master_Customer, error)
-	UpdateNasabah(id int, nasabah model.Master_Customer) (model.Master_Customer,error)
+	UpdateNasabah(id uint64, nasabah model.Master_Customer) (model.Master_Customer,error)
 	VerifyCredential(email string, password string) interface{}
 	IsDuplicateEmail(email string) (tx *gorm.DB)
 	IsDuplicateNIk(noKtp string) (tx *gorm.DB)
@@ -38,7 +38,7 @@ func(db *nasabahConnection)CreateNasabah(nasabah *model.Master_Customer) (*model
 	return nasabah,nil
 }
 
-func(db *nasabahConnection)UpdateNasabah(id int,nasabah model.Master_Customer)( model.Master_Customer, error){
+func(db *nasabahConnection)UpdateNasabah(id uint64,nasabah model.Master_Customer)( model.Master_Customer, error){
 	if nasabah.Password != ""{
 		nasabah.Password = HashPassword([]byte(nasabah.Password))
 	}else {
