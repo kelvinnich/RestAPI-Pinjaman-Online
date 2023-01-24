@@ -7,9 +7,9 @@ import (
 )
 
 type DocumentNasabahRepository interface{
-	Create(dokumen *model.Dokumen_nasabah) error
-	FindByID(id int) (*model.Dokumen_nasabah, error) 
-	Update(id int, dokumen *model.Dokumen_nasabah) error
+	Create(dokumen *model.Master_Document_Customer) error
+	FindByID(id int) (*model.Master_Document_Customer, error) 
+	Update(id int, dokumen *model.Master_Document_Customer) error
 	Delete(id int) error
 }
 
@@ -23,7 +23,7 @@ func NewDocumentRepository(db *gorm.DB)DocumentNasabahRepository{
 	}
 }
 
-func (r *documentConnection) Create(dokumen *model.Dokumen_nasabah) error {
+func (r *documentConnection) Create(dokumen *model.Master_Document_Customer) error {
 	tx := r.DB.Begin()
 
 	
@@ -33,7 +33,7 @@ func (r *documentConnection) Create(dokumen *model.Dokumen_nasabah) error {
 	}
 
 	
-	if err := tx.Model(&model.Nasabah{}).Where("id = $1", dokumen.IdNasabah).Update("status_verified", true).Error; err != nil {
+	if err := tx.Model(&model.Master_Customer{}).Where("id = $1", dokumen.Customer_Id).Update("status_verified", true).Error; err != nil {
 			tx.Rollback()
 			return err
 	}
@@ -44,23 +44,23 @@ func (r *documentConnection) Create(dokumen *model.Dokumen_nasabah) error {
 }
 
 
-func (r *documentConnection) FindByID(id int) (*model.Dokumen_nasabah, error) {
-	var dokumen model.Dokumen_nasabah
+func (r *documentConnection) FindByID(id int) (*model.Master_Document_Customer, error) {
+	var dokumen model.Master_Document_Customer
 	if err := r.DB.First(&dokumen, id).Error; err != nil {
 		return nil, err
 	}
 	return &dokumen, nil
 }
 
-func (r *documentConnection) Update(id int, dokumen *model.Dokumen_nasabah) error {
-	if err := r.DB.Model(&model.Dokumen_nasabah{}).Where("id = $1", id).Updates(dokumen).Error; err != nil {
+func (r *documentConnection) Update(id int, dokumen *model.Master_Document_Customer) error {
+	if err := r.DB.Model(&model.Master_Document_Customer{}).Where("id = $1", id).Updates(dokumen).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (r *documentConnection) Delete(id int) error {
-	if err := r.DB.Where("id = $1", id).Delete(&model.Dokumen_nasabah{}).Error; err != nil {
+	if err := r.DB.Where("id = $1", id).Delete(&model.Master_Document_Customer{}).Error; err != nil {
 		return err
 	}
 	return nil

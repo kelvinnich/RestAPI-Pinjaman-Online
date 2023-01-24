@@ -8,9 +8,9 @@ import (
 
 
 type RepositoryCustomerWork interface{
-	AddCustomerJobs(jobs *model.Pekerjaan_nasabah) error
-	CustomerJobUpdates(id int,jobs *model.Pekerjaan_nasabah) error
-	SearchForCustomerJobsById(id int) (*model.Pekerjaan_nasabah, error)
+	AddCustomerJobs(jobs *model.Master_Jobs_customers) error
+	CustomerJobUpdates(id int,jobs *model.Master_Jobs_customers) error
+	SearchForCustomerJobsById(id int) (*model.Master_Jobs_customers, error)
 	DeleteCustomerJobs(id int)error
 }
 
@@ -25,7 +25,7 @@ func NewRepositoryCustomerWork(db *gorm.DB) RepositoryCustomerWork{
 }
 
 
-func(db *connectionCustomerWork) AddCustomerJobs(jobs *model.Pekerjaan_nasabah) error{
+func(db *connectionCustomerWork) AddCustomerJobs(jobs *model.Master_Jobs_customers) error{
 	if err := db.db.Create(jobs).Error; err != nil {
 		return err
 	}
@@ -33,15 +33,15 @@ func(db *connectionCustomerWork) AddCustomerJobs(jobs *model.Pekerjaan_nasabah) 
 	return nil
 }
 
-func(db *connectionCustomerWork)	CustomerJobUpdates(id int,jobs *model.Pekerjaan_nasabah) error{
-	if err := db.db.Model(&model.Pekerjaan_nasabah{}).Where("id = $1", id).Updates(jobs).Error; err != nil {
+func(db *connectionCustomerWork)	CustomerJobUpdates(id int,jobs *model.Master_Jobs_customers) error{
+	if err := db.db.Model(&model.Master_Jobs_customers{}).Where("id = $1", id).Updates(jobs).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func(db *connectionCustomerWork)SearchForCustomerJobsById(id int) (*model.Pekerjaan_nasabah, error){
-	var jobs model.Pekerjaan_nasabah
+func(db *connectionCustomerWork)SearchForCustomerJobsById(id int) (*model.Master_Jobs_customers, error){
+	var jobs model.Master_Jobs_customers
 	if err := db.db.First(&jobs, id).Error; err != nil {
 		return nil,err
 	}
@@ -50,7 +50,7 @@ func(db *connectionCustomerWork)SearchForCustomerJobsById(id int) (*model.Pekerj
 }
 
 func(db *connectionCustomerWork)DeleteCustomerJobs(id int)error{
-	if err := db.db.Where("id = $1", id).Delete(&model.Pekerjaan_nasabah{}).Error; err != nil{
+	if err := db.db.Where("id = $1", id).Delete(&model.Master_Jobs_customers{}).Error; err != nil{
 		return err
 	}
 	return nil
