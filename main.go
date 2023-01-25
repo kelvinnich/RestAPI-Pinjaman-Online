@@ -19,6 +19,8 @@ var(
 	jwtService service.JwtService = service.NewJwtService()
 	authService service.AuthenticationService = service.NewAuthenticationService(nasabahRepository)
 	nasabahService service.NasabahServic = service.NewNasabahService(nasabahRepository)
+
+	
 	//controller
 	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
 	nasabahController controller.NasabahController = controller.NewNasabahController(nasabahService, jwtService)
