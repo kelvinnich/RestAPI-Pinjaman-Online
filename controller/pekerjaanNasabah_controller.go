@@ -94,7 +94,7 @@ func(c *pekerjaanNasabahController)DeleteCustomerJobsController(ctx *gin.Context
 	var deleteJobsNasabah model.Master_Jobs_customers
 	id,err := strconv.ParseInt(ctx.Param("id"), 0, 0)
 	if err != nil {
-		response := helper.ErrorResponse("failed to proccess request delete jobs customer", err.Error(), helper.EmptyObject{})
+		response := helper.ErrorResponse("failed to proccess request parse id", err.Error(), helper.EmptyObject{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest,response)
 		return
 	}

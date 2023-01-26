@@ -32,10 +32,15 @@ func (r *documentConnection) Create(dokumen *model.Master_Document_Customer) (*m
 			tx.Rollback()
 			return nil, err
 	}
-	if err := tx.Exec("UPDATE master_customers SET status_verified = true WHERE id = $1", dokumen.Customer_Id).Error; err != nil {
-			tx.Rollback()
-			return nil, err
+
+	if err := tx.Model(&model.Master_Customer{Id: dokumen.Customer_Id}).UpdateColumn("status_verified", true).Error; err != nil {
+		tx.Rollback()
+		return nil,err
 	}
+	// if err := tx.Exec("UPDATE master_customers SET status_verified = true WHERE id = $1", dokumen.Customer_Id).Error; err != nil {
+	// 		tx.Rollback()
+	// 		return nil, err
+	// }
 
 	tx.Commit()
 

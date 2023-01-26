@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+	
 	"pinjaman-online/model"
 
 	"gorm.io/gorm"
@@ -10,9 +12,9 @@ import (
 type PinjamanRepository interface{
 	CreatePinjamanRepository(pinjaman *model.Master_Loan) error
 	UpdatePinjamanRepository(id uint64, pinjaman *model.Master_Loan)error
-	SearchPinjamanByIdRepository(id int) (*model.Master_Loan, error)
-	DeletePinjamanRepository(id int)error
-	GetTotalPembayaranNasabah(nasabahID int) (int, error)
+	SearchPinjamanByIdRepository(id uint64) (*model.Master_Loan, error)
+	DeletePinjamanRepository(id uint64)error
+	UpdateLoanStatus( customerID uint64) (*model.Master_Loan, error)
 }
 
 type pinjamanConnection struct {
@@ -39,7 +41,7 @@ func(db *pinjamanConnection)UpdatePinjamanRepository(id uint64, pinjaman *model.
 	return nil
 }
 
-func(db *pinjamanConnection)SearchPinjamanByIdRepository(id int) (*model.Master_Loan, error){
+func(db *pinjamanConnection)SearchPinjamanByIdRepository(id uint64) (*model.Master_Loan, error){
 	var pinjaman model.Master_Loan
 	if err := db.db.First(&pinjaman, id).Error; err != nil{
 		return nil,err
@@ -48,7 +50,7 @@ func(db *pinjamanConnection)SearchPinjamanByIdRepository(id int) (*model.Master_
 	return &pinjaman,nil
 }
 
-func(db *pinjamanConnection)DeletePinjamanRepository(id int)error{
+func(db *pinjamanConnection)DeletePinjamanRepository(id uint64)error{
 	if err := db.db.Where("id = $1", id).Delete(&model.Master_Loan{}).Error; err != nil{
 		return err
 	}
@@ -56,15 +58,23 @@ func(db *pinjamanConnection)DeletePinjamanRepository(id int)error{
 	return nil
 }
 
-func (db *pinjamanConnection) GetTotalPembayaranNasabah(nasabahID int) (int, error) {
-	var pinjaman model.Master_Loan
-	if err := db.db.Where("customer_id = $1", nasabahID).Find(&pinjaman).Error; err != nil {
-			return 0, err
+func(db *pinjamanConnection) UpdateLoanStatus( customerID uint64) (*model.Master_Loan, error) {
+	var customer model.Master_Customer
+	if err := db.db.Where("id = $1", customerID).First(&customer).Error; err != nil {
+		return nil, err
 	}
-	jumlahPinjaman := pinjaman.Amount
-	sukuBunga := pinjaman.Loan_Interest_Rates
-	durasiPinjaman := pinjaman.Loan_Duration
-	pembayaranPerBulan := (jumlahPinjaman * sukuBunga) / (12 * 100) + (jumlahPinjaman / durasiPinjaman)
-	totalPembayaran := pembayaranPerBulan * durasiPinjaman
-	return totalPembayaran, nil
+
+	if customer.StatusVerified {
+		var loan model.Master_Loan
+		if err := db.db.Where("customer_id = $1", customerID).First(&loan).Error; err != nil {
+			return nil, err
+		}
+
+		loan.StatusApproved = true
+		if err := db.db.Save(&loan).Error; err != nil {
+			return nil, err
+		}
+		return &loan, nil
+	}
+	return nil, errors.New("customer status not verified")
 }
