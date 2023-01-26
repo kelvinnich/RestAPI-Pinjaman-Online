@@ -9,7 +9,7 @@ import (
 
 type PinjamanRepository interface{
 	CreatePinjamanRepository(pinjaman *model.Master_Loan) error
-	UpdatePinjamanRepository(id int, pinjaman *model.Master_Loan)error
+	UpdatePinjamanRepository(id uint64, pinjaman *model.Master_Loan)error
 	SearchPinjamanByIdRepository(id int) (*model.Master_Loan, error)
 	DeletePinjamanRepository(id int)error
 	GetTotalPembayaranNasabah(nasabahID int) (int, error)
@@ -32,8 +32,8 @@ func(db *pinjamanConnection)CreatePinjamanRepository(pinjaman *model.Master_Loan
 	return nil
 }
 
-func(db *pinjamanConnection)UpdatePinjamanRepository(id int, pinjaman *model.Master_Loan)error{
-	if err := db.db.Model(model.Master_Loan{}).Where("id = $1").Updates(pinjaman).Error; err != nil {
+func(db *pinjamanConnection)UpdatePinjamanRepository(id uint64, pinjaman *model.Master_Loan)error{
+	if err := db.db.Model(model.Master_Loan{Id: id}).Updates(pinjaman).Error; err != nil {
 		return err
 	}
 	return nil
