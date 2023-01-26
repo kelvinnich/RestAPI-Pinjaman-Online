@@ -8,7 +8,7 @@ type Master_Customer struct {
 	PhoneNumber string `gorm:"type:varchar(255)" json:"phone_number"`
 	Address string `gorm:"type:varchar(255)" json:"address"`
 	NoKtp string `gorm:"uniqueIndex;type:varchar(255)" json:"no_ktp"`
-	StatusVerified bool `gorm:"not null;default:false" json:"status_verified"`
+	StatusVerified bool `gorm:"type:boolean; not null;default:false" json:"status_verified"`
 	Token  string  `gorm:"-" json:"token,omitempty"`
 	Jobs Master_Jobs_customers `gorm:"foreignkey:Customer_Id"`
 }

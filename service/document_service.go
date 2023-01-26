@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"log"
 	"pinjaman-online/dto"
 	"pinjaman-online/model"
@@ -11,7 +12,7 @@ import (
 
 
 type DocumentService interface {
-	UploadDocument(document dto.CreateDocumentNasabahDTO) *model.Master_Document_Customer
+	UploadDocument(document dto.CreateDocumentNasabahDTO) (*model.Master_Document_Customer, error)
 	UpdateDocument(document dto.UpdateDocumentNasabahDTO) *model.Master_Document_Customer
 	GetDocumentById(id uint64) (*model.Master_Document_Customer, error)
 	DeleteDocument(id uint64)error
@@ -27,15 +28,21 @@ func NewDocumentService(documentRepository repository.DocumentNasabahRepository)
 	}
 }
 
-func(s *documentService) UploadDocument(document dto.CreateDocumentNasabahDTO) *model.Master_Document_Customer{
+func (s *documentService) UploadDocument(document dto.CreateDocumentNasabahDTO) (*model.Master_Document_Customer, error) {
 	var documents model.Master_Document_Customer
 	err := smapping.FillStruct(&documents, smapping.MapFields(&document))
-	if err != nil{
-		log.Printf("Error map %v", err)
+	if err != nil {
+			log.Printf("Error mapping fields: %v", err)
+			return nil, err
 	}
 
-	upload,_ := s.documentRepository.Create(&documents)
-	return upload
+	upload, err := s.documentRepository.Create(&documents)
+	if err != nil {
+			log.Printf("Error creating document: %v", err)
+			return nil, err
+	}
+
+	return upload, nil
 }
 
 func(s *documentService) UpdateDocument(document dto.UpdateDocumentNasabahDTO) *model.Master_Document_Customer{
@@ -45,7 +52,12 @@ func(s *documentService) UpdateDocument(document dto.UpdateDocumentNasabahDTO) *
 		log.Printf("Error map %v", )
 	}
 
-	update,_ := s.documentRepository.Update(updateDocument.Id, &updateDocument)
+	fmt.Printf("documentService %s", updateDocument)
+	update,err := s.documentRepository.Update(updateDocument.Id, &updateDocument)
+	if err != nil {
+		fmt.Printf("error Update %v", err)
+	}
+	fmt.Printf("update %s", update)
 	return update
 }
 

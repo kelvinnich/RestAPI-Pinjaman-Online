@@ -1,6 +1,7 @@
-package repository 
+package repository
 
 import (
+	"fmt"
 	"pinjaman-online/model"
 
 	"gorm.io/gorm"
@@ -23,25 +24,24 @@ func NewDocumentRepository(db *gorm.DB)DocumentNasabahRepository{
 	}
 }
 
-func (r *documentConnection) Create(dokumen *model.Master_Document_Customer) (*model.Master_Document_Customer,error) {
+func (r *documentConnection) Create(dokumen *model.Master_Document_Customer) (*model.Master_Document_Customer, error) {
+	
 	tx := r.DB.Begin()
 
-	
 	if err := tx.Create(dokumen).Error; err != nil {
 			tx.Rollback()
-			return nil,err
+			return nil, err
 	}
-
-	
-	if err := tx.Model(&model.Master_Customer{}).Where("id = $1", dokumen.Customer_Id).Update("status_verified", true).Error; err != nil {
+	if err := tx.Exec("UPDATE master_customers SET status_verified = true WHERE id = $1", dokumen.Customer_Id).Error; err != nil {
 			tx.Rollback()
-			return nil,err
+			return nil, err
 	}
 
-	
 	tx.Commit()
-	return dokumen,nil
+
+	return dokumen, nil
 }
+
 
 
 func (r *documentConnection) FindByID(id uint64) (*model.Master_Document_Customer, error) {
@@ -53,9 +53,10 @@ func (r *documentConnection) FindByID(id uint64) (*model.Master_Document_Custome
 }
 
 func (r *documentConnection) Update(id uint64, dokumen *model.Master_Document_Customer) (*model.Master_Document_Customer,error) {
-	if err := r.DB.Model(&model.Master_Document_Customer{}).Where("id = $1", id).Updates(dokumen).Error; err != nil {
+	if err := r.DB.Model(&model.Master_Document_Customer{Id: id}).Updates(dokumen).Error; err != nil {
 		return nil,err
 	}
+	fmt.Printf("documentRepo %s", dokumen)
 	return dokumen,nil
 }
 

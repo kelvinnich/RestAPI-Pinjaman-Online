@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"pinjaman-online/dto"
 	"pinjaman-online/helper"
@@ -30,17 +31,22 @@ func NewDocumentController(ds service.DocumentService, js service.JwtService)Doc
 	}
 }
 
-func(c *documentNasabahController)UploadDocumentController(ctx *gin.Context){
+func (c *documentNasabahController) UploadDocumentController(ctx *gin.Context) {
 	var documentDto dto.CreateDocumentNasabahDTO
 	err := ctx.ShouldBind(&documentDto)
 	if err != nil {
-		response := helper.ErrorResponse("failed to procces request upload document", err.Error(), helper.EmptyObject{})
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
-		return
+			response := helper.ErrorResponse("Failed to process request upload document", err.Error(), helper.EmptyObject{})
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+	} else {
+			v, err := c.documentService.UploadDocument(documentDto)
+			if err != nil {
+					response := helper.ErrorResponse("Failed to process request upload document", err.Error(), helper.EmptyObject{})
+					ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+			} else {
+					response := helper.ResponseOK(true, "OK!", v)
+					ctx.JSON(http.StatusOK, response)
+			}
 	}
-	v := c.documentService.UploadDocument(documentDto)
-	response := helper.ResponseOK(true, "OK!", v)
-	ctx.JSON(http.StatusOK, response)
 }
 
 func(c *documentNasabahController)UpdateDocumentController(ctx *gin.Context){
@@ -60,6 +66,7 @@ func(c *documentNasabahController)UpdateDocumentController(ctx *gin.Context){
 	}
 
 	documentDto.Id = id
+	fmt.Printf("documentcontroller %d", documentDto.Id)
 	updateDocument := c.documentService.UpdateDocument(documentDto)
 	response := helper.ResponseOK(true, "OK!", updateDocument)
 	ctx.JSON(http.StatusOK, response)
