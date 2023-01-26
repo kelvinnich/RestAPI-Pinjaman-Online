@@ -8,8 +8,8 @@ import (
 
 
 type RepositoryCustomerWork interface{
-	AddCustomerJobs(jobs *model.Master_Jobs_customers) error
-	CustomerJobUpdates(id int,jobs *model.Master_Jobs_customers) error
+	AddCustomerJobs(jobs *model.Master_Jobs_customers) (*model.Master_Jobs_customers,error)
+	CustomerJobUpdates(id int,jobs *model.Master_Jobs_customers) (*model.Master_Jobs_customers,error)
 	SearchForCustomerJobsById(id int) (*model.Master_Jobs_customers, error)
 	DeleteCustomerJobs(id int)error
 }
@@ -25,19 +25,19 @@ func NewRepositoryCustomerWork(db *gorm.DB) RepositoryCustomerWork{
 }
 
 
-func(db *connectionCustomerWork) AddCustomerJobs(jobs *model.Master_Jobs_customers) error{
+func(db *connectionCustomerWork) AddCustomerJobs(jobs *model.Master_Jobs_customers) (*model.Master_Jobs_customers,error){
 	if err := db.db.Create(jobs).Error; err != nil {
-		return err
+		return nil,err
 	}
 
-	return nil
+	return jobs,nil
 }
 
-func(db *connectionCustomerWork)	CustomerJobUpdates(id int,jobs *model.Master_Jobs_customers) error{
-	if err := db.db.Model(&model.Master_Jobs_customers{}).Where("id = $1", id).Updates(jobs).Error; err != nil {
-		return err
+func(db *connectionCustomerWork)	CustomerJobUpdates(id int,jobs *model.Master_Jobs_customers) (*model.Master_Jobs_customers,error){
+	if err := db.db.Model(&model.Master_Jobs_customers{ID: id}).Updates(jobs).Error; err != nil {
+		return nil,err
 	}
-	return nil
+	return jobs,nil
 }
 
 func(db *connectionCustomerWork)SearchForCustomerJobsById(id int) (*model.Master_Jobs_customers, error){
