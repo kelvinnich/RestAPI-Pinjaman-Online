@@ -6,6 +6,7 @@ import (
 	"pinjaman-online/dto"
 	"pinjaman-online/model"
 	"pinjaman-online/repository"
+	"strconv"
 
 	"github.com/mashingan/smapping"
 )
@@ -21,11 +22,13 @@ type PinjamanService interface{
 
 type pinjamanService struct{
 	pinjamanRepo repository.PinjamanRepository
+	nasabahRepo repository.NasabahRepository
 }
 
-func NewPinjamanService(pinjamanRepo repository.PinjamanRepository)PinjamanService{
+func NewPinjamanService(pinjamanRepo repository.PinjamanRepository, nasabah repository.NasabahRepository)PinjamanService{
 	return &pinjamanService{
 		pinjamanRepo: pinjamanRepo,
+		nasabahRepo: nasabah,
 	}
 }
 
@@ -35,11 +38,14 @@ func(s *pinjamanService)CreatePinjamanService(pinjaman dto.CreatePinjamanDTO) (*
 	if err != nil {
 		log.Printf("Error map %v", err)
 	}
-
-	var customer model.Master_Customer 
 	
 
-	if customer.StatusVerified{
+	custId := strconv.Itoa(int(pinjaman.Customer_Id))
+
+	serviceNasabah := NewNasabahService(s.nasabahRepo)
+	customer := serviceNasabah.ProfileNasabah(custId)
+	log.Printf("status verified %v", customer.StatusVerified)
+	if !customer.StatusVerified{
 		if pinjaman.Amount > 500000 {
 			return nil, errors.New("batas peminjaman untuk user belum terverifikasi adalah 500000")
 		}
@@ -65,15 +71,17 @@ func(s *pinjamanService) UpdatePinjamanService(pinjaman dto.UpdatePinjamanDTO)(*
 		log.Printf("Error map %v", err)
 	}
 
-	var customer model.Master_Customer
-	
+	custId := strconv.Itoa(int(pinjaman.Customer_Id))
 
-	if customer.StatusVerified == false{
+	serviceNasabah := NewNasabahService(s.nasabahRepo)
+	customer := serviceNasabah.ProfileNasabah(custId)
+	log.Printf("status verified %v", customer.StatusVerified)
+	if !customer.StatusVerified{
 		if pinjaman.Amount > 500000 {
 			return nil, errors.New("batas peminjaman untuk user belum terverifikasi adalah 500000")
 		}
 
-		}else if customer.StatusVerified == true{
+		}else {
 			if pinjaman.Amount > 10000000 {
 				return nil, errors.New("batas peminjaman untuk user sudah terverifikasi adalah 10000000")
 	}
@@ -86,6 +94,7 @@ func(s *pinjamanService) UpdatePinjamanService(pinjaman dto.UpdatePinjamanDTO)(*
 	}
 	return pinjamans, nil
 }
+
 
 
 func(s *pinjamanService) SearchPinjamanByIdService(id uint64)(*model.Master_Loan, error){

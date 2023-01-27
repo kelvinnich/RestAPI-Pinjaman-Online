@@ -24,7 +24,7 @@ var(
 	nasabahService service.NasabahServic = service.NewNasabahService(nasabahRepository)
 	documentService service.DocumentService = service.NewDocumentService(documentRepository)
 	pekerjaanNasabahService service.PekerjaanNasabahService = service.NewPekerjaanNasabahService(pekerjaanRepository)
-	pinjamanService service.PinjamanService = service.NewPinjamanService(pinjamanRepository)
+	pinjamanService service.PinjamanService = service.NewPinjamanService(pinjamanRepository,nasabahRepository)
 	
 	//controller
 	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
