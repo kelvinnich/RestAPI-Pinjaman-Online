@@ -17,6 +17,7 @@ var(
 	documentRepository repository.DocumentNasabahRepository = repository.NewDocumentRepository(db)
 	pekerjaanRepository repository.RepositoryCustomerWork =  repository.NewRepositoryCustomerWork(db)
 	pinjamanRepository repository.PinjamanRepository = repository.NewPinjamanRepository(db)
+	pembayaranRepository repository.PembayaranRepository = repository.NewPembayaranRepository(db)
 
 	//service
 	jwtService service.JwtService = service.NewJwtService()
@@ -25,6 +26,7 @@ var(
 	documentService service.DocumentService = service.NewDocumentService(documentRepository)
 	pekerjaanNasabahService service.PekerjaanNasabahService = service.NewPekerjaanNasabahService(pekerjaanRepository)
 	pinjamanService service.PinjamanService = service.NewPinjamanService(pinjamanRepository,nasabahRepository)
+	pembayaranService service.PembayaranService = service.NewPembayaranService(pembayaranRepository)
 	
 	//controller
 	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
@@ -32,6 +34,7 @@ var(
 	documentController controller.DocumentNasabahController = controller.NewDocumentController(documentService, jwtService)
 	pekerjaanNasabahController controller.PekerjaanNasabahController = controller.NewPekerjaanNasabahController(pekerjaanNasabahService,jwtService)
 	pinjamanController controller.PinjamanController = controller.NewPinajamanController(pinjamanService, jwtService)
+	pembayaranController controller.PembayaranController = controller.NewPembayaranController(pembayaranService, jwtService)
 )
 
 func main(){
@@ -74,6 +77,13 @@ func main(){
 		pinjamanNasabah.GET("/:id", pinjamanController.SearchPinjamanByIdController)
 		pinjamanNasabah.GET("/verifikasi/:id", pinjamanController.UpdateStatusApprovalPinjamanController)
 		pinjamanNasabah.DELETE("/:id", pinjamanController.DeletePinjamanController)
+	}
+
+	pembayaranNasabah := r.Group("pinjol/pembayaran", middleware.Authorize(jwtService))
+	{
+		pembayaranNasabah.POST("/perbulan", pembayaranController.PembayaranPinjamanController)
+		pembayaranNasabah.GET("/status/:status", pembayaranController.ListPembayaranByStatusController)
+		pembayaranNasabah.PUT("/:id", pembayaranController.UpdatePembayaranController)
 	}
 
 	r.Run(":3000")

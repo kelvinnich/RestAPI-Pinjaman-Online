@@ -9,5 +9,5 @@ type Transactions_Payment_Loan struct {
 	Loan_Amount int `gorm:"type:integer" json:"loan_amount"`
 	Monthly_Payments int `gorm:"type:integer" json:"monthly_payment"`
 	Payment_Status bool `gorm:"type:boolean" json:"payment_status"`
-	Payment_Date time.Time `gorm:"type:timestamp" json:"payment_date"`
+	Payment_Date time.Time `gorm:"type:time" json:"payment_date"`
 	}

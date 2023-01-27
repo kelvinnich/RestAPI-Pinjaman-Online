@@ -8,9 +8,9 @@ import (
 )
 
 type PembayaranRepository interface {
-	CreatePembayaranRepository(pembayaran *model.Transactions_Payment_Loan) error
+	CreatePembayaranRepository(pembayaran *model.Transactions_Payment_Loan) (*model.Transactions_Payment_Loan,error)
 	FindByIdRepository(id int) (*model.Transactions_Payment_Loan, error)
-	UpdatePembayaranRepository(id int, pembayaran *model.Transactions_Payment_Loan) error
+	UpdatePembayaranRepository(id int, pembayaran *model.Transactions_Payment_Loan) (*model.Transactions_Payment_Loan,error)
 	DeletePembayaranRepository(id int) error
 	ListPembayaranRepository() ([]*model.Transactions_Payment_Loan, error)
 	GetPembayaranPerBulanRepository(pinjamanID int) (int, error)
@@ -29,28 +29,28 @@ func NewPembayaranRepository(db *gorm.DB)PembayaranRepository{
 	}
 }
 
-func(db *pembayaranConnection)CreatePembayaranRepository(pembayaran *model.Transactions_Payment_Loan) error{
-	if err := db.db.Create(pembayaran).Error; err != nil {
-		return err
+func (db *pembayaranConnection) CreatePembayaranRepository(pembayaran *model.Transactions_Payment_Loan) (*model.Transactions_Payment_Loan, error) {
+	if err := db.db.Transaction(func(tx *gorm.DB) error {
+			if err := tx.Create(pembayaran).Error; err != nil {
+					return err
+			}
+			if err := tx.Model(&model.Master_Loan{Id: pembayaran.Loan.Id}).Where("id", pembayaran.Loan_id).UpdateColumn("amount", gorm.Expr("amount - ?", pembayaran.Monthly_Payments)).Error; err != nil {
+					return err
+			}
+			return nil
+	}); err != nil {
+			return nil, err
 	}
-
-	if err := db.init(); err != nil{
-		return err
-	}
-
-	return nil
+	return pembayaran, nil
 }
 
-func(db *pembayaranConnection )UpdatePembayaranRepository(id int, pembayaran *model.Transactions_Payment_Loan) error{
-	if err := db.db.Model(&model.Transactions_Payment_Loan{}).Where("id = $1", id).Updates(pembayaran).Error; err != nil {
-		return err
+
+func(db *pembayaranConnection )UpdatePembayaranRepository(id int, pembayaran *model.Transactions_Payment_Loan) (*model.Transactions_Payment_Loan,error){
+	if err := db.db.Model(&model.Transactions_Payment_Loan{}).Where("id", id).Updates(pembayaran).Error; err != nil {
+		return nil,err
 	}
 
-	if err := db.init(); err != nil{
-		return err
-	}
-
-	return nil
+	return pembayaran,nil
 }
 
 func(db *pembayaranConnection)FindByIdRepository(id int) (*model.Transactions_Payment_Loan, error){
@@ -121,26 +121,6 @@ func (db *pembayaranConnection) GetJatuhTempoPembayaranRepository(pinjamanID int
 
     return jatuhTempo, nil
 }
-
-func(db *pembayaranConnection) init() error {
-
-	triggerSQL := `
-	CREATE TRIGGER update_payment_status
-	AFTER INSERT ON Transactions_payment_loans
-	FOR EACH ROW
-	BEGIN
-	UPDATE Transactions_payment_loans
-	SET Payment_Status = true
-	WHERE id = NEW.id;
-	END;
-	`
-
-	if err := db.db.Exec(triggerSQL).Error; err != nil {
-			return err
-	}
-	return nil
-}
-
 
 
 
