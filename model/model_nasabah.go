@@ -11,4 +11,5 @@ type Master_Customer struct {
 	StatusVerified bool `gorm:"type:boolean; not null;default:false" json:"status_verified"`
 	Token  string  `gorm:"-" json:"token,omitempty"`
 	Jobs Master_Jobs_customers `gorm:"foreignkey:Customer_Id"`
+	
 }

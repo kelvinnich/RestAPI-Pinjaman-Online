@@ -114,3 +114,4 @@ func (s *pinjamanService) UpdateLoanStatus(customerId uint64) (*model.Master_Loa
 	return loan, nil
 }
 
+

@@ -84,6 +84,9 @@ func main(){
 		pembayaranNasabah.POST("/perbulan", pembayaranController.PembayaranPinjamanController)
 		pembayaranNasabah.GET("/status/:status", pembayaranController.ListPembayaranByStatusController)
 		pembayaranNasabah.PUT("/:id", pembayaranController.UpdatePembayaranController)
+		pembayaranNasabah.GET("/:id", pembayaranController.GetPembayaranPerBulanController)
+		pembayaranNasabah.GET("/totalPembayaran/:id", pembayaranController.GetTotalPembayaranController)
+		pembayaranNasabah.DELETE("/:id", pembayaranController.DeletePembayaranController)
 	}
 
 	r.Run(":3000")

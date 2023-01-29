@@ -2,7 +2,6 @@ package repository
 
 import (
 	"pinjaman-online/model"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -15,7 +14,6 @@ type PembayaranRepository interface {
 	ListPembayaranRepository() ([]*model.Transactions_Payment_Loan, error)
 	GetPembayaranPerBulanRepository(pinjamanID int) (int, error)
 	GetTotalPembayaranRepository(pinjamanID int) (int, error)
-	GetJatuhTempoPembayaranRepository(pinjamanID int) ([]time.Time, error)
 }
 
 type pembayaranConnection struct {
@@ -34,7 +32,7 @@ func (db *pembayaranConnection) CreatePembayaranRepository(pembayaran *model.Tra
 			if err := tx.Create(pembayaran).Error; err != nil {
 					return err
 			}
-			if err := tx.Model(&model.Master_Loan{Id: pembayaran.Loan.Id}).Where("id", pembayaran.Loan_id).UpdateColumn("amount", gorm.Expr("amount - ?", pembayaran.Monthly_Payments)).Error; err != nil {
+			if err := tx.Model(&model.Master_Loan{}).Where("id", pembayaran.Loan_id).UpdateColumn("amount", gorm.Expr("amount - ?", pembayaran.Monthly_Payments)).Error; err != nil {
 					return err
 			}
 			return nil
@@ -101,27 +99,6 @@ func (db *pembayaranConnection) GetTotalPembayaranRepository(pinjamanID int) (in
 	totalPembayaran := pembayaranPerBulan * durasiPinjaman
 	return totalPembayaran, nil
 	}
-
-func (db *pembayaranConnection) GetJatuhTempoPembayaranRepository(pinjamanID int) ([]time.Time, error) {
-    var pembayarans []*model.Transactions_Payment_Loan
-    var jatuhTempo []time.Time
-    var pinjaman model.Master_Loan
-
-    if err := db.db.First(&pinjaman, pinjamanID).Error; err != nil {
-        return nil, err
-    }
-
-    if err := db.db.Where("loan_id = $1", pinjamanID).Find(&pembayarans).Error; err != nil {
-        return nil, err
-    }
-
-    for _, pembayaran := range pembayarans {
-        jatuhTempo = append(jatuhTempo, pembayaran.Payment_Date.AddDate(0, int(pinjaman.Loan_Duration), 0))
-    }
-
-    return jatuhTempo, nil
-}
-
 
 
 
