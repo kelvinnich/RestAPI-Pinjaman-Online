@@ -1,7 +1,7 @@
 package service
 
 import (
-	"errors"
+	"fmt"
 	"log"
 
 	"pinjaman-online/dto"
@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/mashingan/smapping"
-
 )
 
 type PembayaranService interface {
@@ -45,15 +44,6 @@ func (s *pembayaranService) PembayaranPinjamanService(dtoPayment *dto.CreatePemb
 		txPinjaman.Payment_Status = true
 	}
 
-	getPembayaranPerbulan,err := s.pembayaranRepository.GetPembayaranPerBulanRepository(txPinjaman.Loan_id)
-	if err != nil {
-		log.Printf("Error map %v",err)
-	}
-	
-	if dtoPayment.Monthly_Payments != getPembayaranPerbulan {
-		return nil, errors.New("maaf pembayaran anda tidak sesuai dengan pembayaran perbulan")
-	}
-
 	txPinjaman.Payment_Date = time.Now()
 
 	pembayaran, err := s.pembayaranRepository.CreatePembayaranRepository(&txPinjaman)
@@ -69,15 +59,15 @@ func(s *pembayaranService) UpdatePembayaranService(updatePayment dto.UpdatePemba
 	var txPinjaman model.Transactions_Payment_Loan
 	err := smapping.FillStruct(&txPinjaman, smapping.MapFields(&updatePayment))
 	if err != nil {
-		log.Printf("Error Map %v", err)
+		return nil, fmt.Errorf("Error mapping input: %v", err)
 	}
 
-	updateTx,err := s.pembayaranRepository.UpdatePembayaranRepository(txPinjaman.ID, &txPinjaman)
+	updatedTxPinjaman, err := s.pembayaranRepository.UpdatePembayaranRepository(updatePayment.Id, &txPinjaman)
 	if err != nil {
-		log.Printf("Error to update pembayaran %v", err)
+		return nil, fmt.Errorf("Error updating pembayaran: %v", err)
 	}
 
-	return updateTx, nil
+	return updatedTxPinjaman, nil
 }
 
 func (s *pembayaranService) ListPembayaranByStatusService(status string) ([]*model.Transactions_Payment_Loan, error) {

@@ -53,16 +53,16 @@ func(c *pembayaranController)PembayaranPinjamanController(ctx *gin.Context){
 }
 
 
-func (c *pembayaranController) UpdatePembayaranController(ctx *gin.Context){
+func (c *pembayaranController) UpdatePembayaranController(ctx *gin.Context) {
 	var updateDTO dto.UpdatePembayaranDTO
-	err := ctx.ShouldBind(&updateDTO)
+	err := ctx.ShouldBindJSON(&updateDTO)
 	if err != nil {
-		response := helper.ErrorResponse("failed to procces request", err.Error(), helper.EmptyObject{})
+		response := helper.ErrorResponse("failed to process request", err.Error(), helper.EmptyObject{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
 	}
 
-	id,err := strconv.ParseInt(ctx.Param("id"),0,0)
+	id, err := strconv.ParseInt(ctx.Param("id"), 10, 64)
 	if err != nil {
 		response := helper.ErrorResponse("failed to parse id", err.Error(), helper.EmptyObject{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
@@ -70,10 +70,17 @@ func (c *pembayaranController) UpdatePembayaranController(ctx *gin.Context){
 	}
 
 	updateDTO.Id = int(id)
-	update,err := c.pembayaranService.UpdatePembayaranService(updateDTO)
-	response := helper.ResponseOK(true, "OK!", update)
+	updatedPembayaran, err := c.pembayaranService.UpdatePembayaranService(updateDTO)
+	if err != nil {
+		response := helper.ErrorResponse("failed to update pembayaran", err.Error(), helper.EmptyObject{})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := helper.ResponseOK(true, "OK!", updatedPembayaran)
 	ctx.JSON(http.StatusOK, response)
 }
+
 
 func(c *pembayaranController) GetPembayaranPerBulanController(ctx *gin.Context){
 	id,err := strconv.ParseInt(ctx.Param("id"), 0, 0)

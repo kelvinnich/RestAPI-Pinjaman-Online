@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"log"
 	"pinjaman-online/model"
 
@@ -64,13 +65,29 @@ func (db *pembayaranConnection) CreatePembayaranRepository(pembayaran *model.Tra
 }
 
 
-func(db *pembayaranConnection )UpdatePembayaranRepository(id int, pembayaran *model.Transactions_Payment_Loan) (*model.Transactions_Payment_Loan,error){
-	if err := db.db.Model(&model.Transactions_Payment_Loan{}).Where("id", id).Updates(pembayaran).Error; err != nil {
-		return nil,err
+func (db *pembayaranConnection) UpdatePembayaranRepository(id int, pembayaran *model.Transactions_Payment_Loan) (*model.Transactions_Payment_Loan, error) {
+	if id <= 0 {
+		return nil, fmt.Errorf("ID tidak valid: %d", id)
+	}
+	
+	var currentPembayaran model.Transactions_Payment_Loan
+	err := db.db.First(&currentPembayaran, id).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("record not found with id %d", id)
+		}
+		return nil, err
 	}
 
-	return pembayaran,nil
+	err = db.db.Model(&currentPembayaran).Updates(pembayaran).Error
+	if err != nil {
+		return nil, err
+	}
+	return &currentPembayaran, nil
 }
+
+
+
 
 func(db *pembayaranConnection)FindByIdRepository(id int) (*model.Transactions_Payment_Loan, error){
 	var pembayaran model.Transactions_Payment_Loan
