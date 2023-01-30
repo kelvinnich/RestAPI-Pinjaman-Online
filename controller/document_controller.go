@@ -38,7 +38,7 @@ func (c *documentNasabahController) UploadDocumentController(ctx *gin.Context) {
 			response := helper.ErrorResponse("Failed to process request upload document", err.Error(), helper.EmptyObject{})
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 	} else {
-			v, err := c.documentService.UploadDocument(documentDto)
+			v, err := c.documentService.UploadDocument(&documentDto)
 			if err != nil {
 					response := helper.ErrorResponse("Failed to process request upload document", err.Error(), helper.EmptyObject{})
 					ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
@@ -82,11 +82,11 @@ func(c *documentNasabahController)FindDocumentByIdController(ctx *gin.Context){
 
 	
 	 docs, err := c.documentService.GetDocumentById(id)
-	if (*docs == model.Master_Document_Customer{}){
-		response := helper.ErrorResponse("failed to procces data id not found", "this data is not the same", helper.EmptyObject{})
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
-		return
-	}else {
+	 if &docs == nil || err != nil {
+		response := helper.ErrorResponse("Failed to process data. ID not found", "This data is not the same", helper.EmptyObject{})
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+			return
+	} else {
 		response := helper.ResponseOK(true, "OK!", docs)
 		ctx.JSON(http.StatusOK, response)
 	}

@@ -1,16 +1,19 @@
 package main
 
 import (
+	"log"
 	"pinjaman-online/config"
 	"pinjaman-online/controller"
+	"pinjaman-online/middleware"
 	"pinjaman-online/repository"
 	"pinjaman-online/service"
-	"pinjaman-online/middleware"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 var(
-	db = config.ConnectDB()
+	db *gorm.DB = config.ConnectDB()
+	
 
 	//repository
 	nasabahRepository repository.NasabahRepository = repository.NewNasabahRepository(db)
@@ -18,6 +21,7 @@ var(
 	pekerjaanRepository repository.RepositoryCustomerWork =  repository.NewRepositoryCustomerWork(db)
 	pinjamanRepository repository.PinjamanRepository = repository.NewPinjamanRepository(db)
 	pembayaranRepository repository.PembayaranRepository = repository.NewPembayaranRepository(db)
+	historyPembayaran repository.HistoryPembayaranRepository = repository.NewHistoryPembayaranRepository(db)
 
 	//service
 	jwtService service.JwtService = service.NewJwtService()
@@ -27,6 +31,7 @@ var(
 	pekerjaanNasabahService service.PekerjaanNasabahService = service.NewPekerjaanNasabahService(pekerjaanRepository)
 	pinjamanService service.PinjamanService = service.NewPinjamanService(pinjamanRepository,nasabahRepository)
 	pembayaranService service.PembayaranService = service.NewPembayaranService(pembayaranRepository)
+	historyService service.HistoryPembayaranService = service.NewHistoryPembayaranService(historyPembayaran)
 	
 	//controller
 	authController controller.AuthController = controller.NewAuthController(authService, jwtService)
@@ -35,10 +40,12 @@ var(
 	pekerjaanNasabahController controller.PekerjaanNasabahController = controller.NewPekerjaanNasabahController(pekerjaanNasabahService,jwtService)
 	pinjamanController controller.PinjamanController = controller.NewPinajamanController(pinjamanService, jwtService)
 	pembayaranController controller.PembayaranController = controller.NewPembayaranController(pembayaranService, jwtService)
+	historyPembayaranController controller.HistoryPembayaranController = controller.NewHistoryPembayaranController(historyService, jwtService)
 )
 
 func main(){
 	defer config.CloseDB(db)
+	log.Println(db)
 
 	r := gin.Default()
 
@@ -87,6 +94,14 @@ func main(){
 		pembayaranNasabah.GET("/:id", pembayaranController.GetPembayaranPerBulanController)
 		pembayaranNasabah.GET("/totalPembayaran/:id", pembayaranController.GetTotalPembayaranController)
 		pembayaranNasabah.DELETE("/:id", pembayaranController.DeletePembayaranController)
+	}
+
+	historyPembayaranNasabah := r.Group("history/pembayaran", middleware.Authorize(jwtService))
+	{
+		historyPembayaranNasabah.GET("/", historyPembayaranController.GetAllHistoryPembayaranController)
+		historyPembayaranNasabah.GET("/:id", historyPembayaranController.GetHistoryPembayaranByIdController)
+		historyPembayaranNasabah.PUT("/:id", historyPembayaranController.UpdateHistoryPembayaranController)
+	historyPembayaranNasabah.DELETE(":id", historyPembayaranController.DeleteHistoryPembayaranController)
 	}
 
 	r.Run(":3000")

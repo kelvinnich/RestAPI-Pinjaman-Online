@@ -50,11 +50,11 @@ func (r *documentConnection) Create(dokumen *model.Master_Document_Customer) (*m
 
 
 func (r *documentConnection) FindByID(id uint64) (*model.Master_Document_Customer, error) {
-	var dokumen model.Master_Document_Customer
+	var dokumen *model.Master_Document_Customer
 	if err := r.DB.First(&dokumen, id).Error; err != nil {
-		return nil, err
+		return nil,err
 	}
-	return &dokumen, nil
+	return dokumen, nil
 }
 
 func (r *documentConnection) Update(id uint64, dokumen *model.Master_Document_Customer) (*model.Master_Document_Customer,error) {

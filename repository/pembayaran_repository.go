@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"log"
 	"pinjaman-online/model"
 
 	"gorm.io/gorm"
@@ -35,10 +36,30 @@ func (db *pembayaranConnection) CreatePembayaranRepository(pembayaran *model.Tra
 			if err := tx.Model(&model.Master_Loan{}).Where("id", pembayaran.Loan_id).UpdateColumn("amount", gorm.Expr("amount - ?", pembayaran.Monthly_Payments)).Error; err != nil {
 					return err
 			}
+
+			go func() {
+				history := &model.Master_Payment_History{
+					Loan_id: pembayaran.Loan_id,
+					Payment_id: pembayaran.ID,
+					Date: pembayaran.Payment_Date,
+					Loan: pembayaran.Loan,
+					Transaction: *pembayaran,
+				}
+				hstry := NewHistoryPembayaranRepository(db.db)
+				if err := hstry.CreateHistoryPembayaranRepository(history); err != nil {
+					log.Println(err)
+				}
+			}()
+
+
+
+
 			return nil
 	}); err != nil {
 			return nil, err
 	}
+
+
 	return pembayaran, nil
 }
 
@@ -99,6 +120,5 @@ func (db *pembayaranConnection) GetTotalPembayaranRepository(pinjamanID int) (in
 	totalPembayaran := pembayaranPerBulan * durasiPinjaman
 	return totalPembayaran, nil
 	}
-
 
 

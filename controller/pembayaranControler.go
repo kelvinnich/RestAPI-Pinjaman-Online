@@ -42,7 +42,7 @@ func(c *pembayaranController)PembayaranPinjamanController(ctx *gin.Context){
 		return
 	}
 
-	payment, err := c.pembayaranService.PembayaranPinjamanService(dtoPayment)
+	payment, err := c.pembayaranService.PembayaranPinjamanService(&dtoPayment)
 	if err != nil {
 		response := helper.ErrorResponse("failed to create payment", err.Error(), helper.EmptyObject{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)

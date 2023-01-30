@@ -12,9 +12,9 @@ import (
 
 
 type DocumentService interface {
-	UploadDocument(document dto.CreateDocumentNasabahDTO) (*model.Master_Document_Customer, error)
+	UploadDocument(document *dto.CreateDocumentNasabahDTO) (*model.Master_Document_Customer, error)
 	UpdateDocument(document dto.UpdateDocumentNasabahDTO) *model.Master_Document_Customer
-	GetDocumentById(id uint64) (*model.Master_Document_Customer, error)
+	GetDocumentById(id uint64) (model.Master_Document_Customer, error)
 	DeleteDocument(id uint64)error
 }
 
@@ -28,7 +28,7 @@ func NewDocumentService(documentRepository repository.DocumentNasabahRepository)
 	}
 }
 
-func (s *documentService) UploadDocument(document dto.CreateDocumentNasabahDTO) (*model.Master_Document_Customer, error) {
+func (s *documentService) UploadDocument(document *dto.CreateDocumentNasabahDTO) (*model.Master_Document_Customer, error) {
 	var documents model.Master_Document_Customer
 	err := smapping.FillStruct(&documents, smapping.MapFields(&document))
 	if err != nil {
@@ -61,8 +61,12 @@ func(s *documentService) UpdateDocument(document dto.UpdateDocumentNasabahDTO) *
 	return update
 }
 
-func(s *documentService) GetDocumentById(id uint64) (*model.Master_Document_Customer, error){
-	return s.documentRepository.FindByID(id)
+func(s *documentService) GetDocumentById(id uint64) (model.Master_Document_Customer, error){
+	docs,err := s.documentRepository.FindByID(id)
+	if err != nil{
+		log.Printf("errot docs service %v", err)
+	}
+	return *docs, nil
 }
 
 func(s *documentService) DeleteDocument(id uint64)error{

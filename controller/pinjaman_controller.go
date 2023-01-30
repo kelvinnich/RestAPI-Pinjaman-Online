@@ -6,6 +6,7 @@ import (
 	"pinjaman-online/helper"
 	"pinjaman-online/model"
 	"pinjaman-online/service"
+	"reflect"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -86,11 +87,11 @@ func(c *pinjamanController)SearchPinjamanByIdController(ctx *gin.Context){
 	}
 
 	pinjaman, err := c.pinjamanService.SearchPinjamanByIdService(id)
-	if (*pinjaman == model.Master_Loan{}){
+	if reflect.DeepEqual(*pinjaman, model.Master_Loan{}) {
 		response := helper.ErrorResponse("failed to procces data id not found", err.Error(), helper.EmptyObject{})
 		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
 		return
-	}else {
+	} else {
 		response := helper.ResponseOK(true, "OK!", pinjaman)
 		ctx.JSON(http.StatusOK, response)
 	}

@@ -30,10 +30,12 @@ func ConnectDB() *gorm.DB{
 	if err != nil {
 		panic(err)
 	}
-	
 
-  db.AutoMigrate(&model.Master_Customer{}, &model.Master_Document_Customer{}, &model.Master_Loan{}, &model.Transactions_Payment_Loan{}, &model.Master_Payment_History{}, &model.Master_Jobs_customers{} )
-
+	err = db.AutoMigrate(&model.Master_Customer{}, &model.Master_Document_Customer{}, &model.Master_Loan{}, &model.Transactions_Payment_Loan{}, &model.Master_Payment_History{}, &model.Master_Jobs_customers{})
+	if err != nil {
+		fmt.Println("Error migrating tables: ", err)
+		os.Exit(1)
+	}
 
 	return db
 }

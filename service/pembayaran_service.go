@@ -15,7 +15,7 @@ import (
 )
 
 type PembayaranService interface {
-	PembayaranPinjamanService(payment dto.CreatePembayaranDTO) (*model.Transactions_Payment_Loan, error)
+	PembayaranPinjamanService(payment *dto.CreatePembayaranDTO) (*model.Transactions_Payment_Loan, error)
 	ListPembayaranByStatusService(status string) ([]*model.Transactions_Payment_Loan, error)
 	UpdatePembayaranService(updatePayment dto.UpdatePembayaranDTO) (*model.Transactions_Payment_Loan, error)
 	GetPembayaranPerBulanService(pinjamanID int) (int, error)
@@ -33,7 +33,7 @@ func NewPembayaranService(pembayaranRepo repository.PembayaranRepository)Pembaya
 	}
 }
 
-func (s *pembayaranService) PembayaranPinjamanService(dtoPayment dto.CreatePembayaranDTO) (*model.Transactions_Payment_Loan, error) {
+func (s *pembayaranService) PembayaranPinjamanService(dtoPayment *dto.CreatePembayaranDTO) (*model.Transactions_Payment_Loan, error) {
 	var txPinjaman model.Transactions_Payment_Loan
 	err := smapping.FillStruct(&txPinjaman, smapping.MapFields(&dtoPayment))
 	if err != nil {

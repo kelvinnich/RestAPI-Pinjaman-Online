@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+	"log"
 	"pinjaman-online/model"
 
 	"gorm.io/gorm"
@@ -9,11 +11,11 @@ import (
 
 type HistoryPembayaranRepository interface{
 	CreateHistoryPembayaranRepository(history *model.Master_Payment_History)error
-	UpdateHistoryPembayaranRepository(id int, history *model.Master_Payment_History)error
+	UpdateHistoryPembayaranRepository(id uint64, history *model.Master_Payment_History)(model.Master_Payment_History,error)
 	GetAllHistoryPembayaranRepository()  ([]*model.Master_Payment_History, error)
-	GetHistoryPembayaranByIdRepository(id int)(*model.Master_Payment_History, error)
-	DeleteHistoryPembayaranRepository(id int )error
-	GetRiwayatPembayaranNasabah(nasabahID int, status string) ([]*model.Master_Payment_History, error)
+	GetHistoryPembayaranByIdRepository(id uint64)(*model.Master_Payment_History, error)
+	DeleteHistoryPembayaranRepository(id uint64 )error
+	GetRiwayatPembayaranNasabahById(nasabahID uint64) ([]*model.Master_Payment_History, error)
 }
 
 type historyPembayaranConnection struct{
@@ -33,27 +35,32 @@ func(db *historyPembayaranConnection)CreateHistoryPembayaranRepository(history *
 	return nil
 }
 
-func(db *historyPembayaranConnection)UpdateHistoryPembayaranRepository(id int, history *model.Master_Payment_History)error{
-	if err := db.db.Where("id = $1", id).Updates(history).Error; err != nil {
-		return err
+func(db *historyPembayaranConnection)UpdateHistoryPembayaranRepository(id uint64, history *model.Master_Payment_History)(model.Master_Payment_History,error){
+	if err := db.db.Model(&model.Master_Payment_History{Id: id}).Updates(history).Error; err != nil {
+		log.Printf("failed tp update history pembayaran repository %v",err)
 	}
-	return nil
+	return *history,nil
 }
 
 func(db *historyPembayaranConnection)GetAllHistoryPembayaranRepository()  ([]*model.Master_Payment_History, error){
 	var historyPembayaran []*model.Master_Payment_History
-	err := db.db.Table("Master_Payment_Historys").
-			Select("Master_Payment_Historys.*, master_loans.customer_id, transaction_payment_loans.payment_status").
-			Joins("JOIN transaction_payment_loans ON transaction_payment_loans.id = Master_Payment_Historys.payment_id").
-			Joins("JOIN master_loans ON master_loans.id = Master_Payment_Historys.loan_id").
+	err := db.db.Table("master_payment_histories").
+			Select("master_payment_histories.*, master_loans.customer_id, transactions_payment_loans.payment_status").
+			Joins("JOIN transactions_payment_loans ON transactions_payment_loans.id = master_payment_histories.payment_id").
+			Joins("JOIN master_loans ON master_loans.id = master_payment_histories.loan_id").
 			Scan(&historyPembayaran).Error
-	if err != nil {
-			return nil, err
-	}
+			if err != nil {
+				log.Println(err)
+				return nil, err
+			}
+			if len(historyPembayaran) == 0 {
+				log.Println("Data tidak ditemukan")
+				return nil, errors.New("Data tidak ditemukan")
+			}
 	return historyPembayaran, nil
 }
 
-func(db *historyPembayaranConnection)GetHistoryPembayaranByIdRepository(id int)(*model.Master_Payment_History, error){
+func(db *historyPembayaranConnection)GetHistoryPembayaranByIdRepository(id uint64)(*model.Master_Payment_History, error){
 	var history model.Master_Payment_History
 	if err := db.db.First(&history, id).Error; err != nil {
 		return nil,err
@@ -61,23 +68,29 @@ func(db *historyPembayaranConnection)GetHistoryPembayaranByIdRepository(id int)(
 	return &history,nil
 }
 
-func(db *historyPembayaranConnection)DeleteHistoryPembayaranRepository(id int )error{
+func(db *historyPembayaranConnection)DeleteHistoryPembayaranRepository(id uint64 )error{
 	if err := db.db.Where("id = $1", id).Delete(&model.Master_Payment_History{}).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (db *historyPembayaranConnection) GetRiwayatPembayaranNasabah(nasabahID int, status string) ([]*model.Master_Payment_History, error) {
-	var riwayatPembayaran []*model.Master_Payment_History
-	err := db.db.Table("Master_Payment_Historys").
-			Select("Master_Payment_Historys.*").
-			Joins("JOIN transaction_payment_loans ON transaction_payment_loans.id = Master_Payment_Historys.payment_id").
-			Joins("JOIN master_loans ON master_loans.id = Master_Payment_Historys.loan_id").
-			Where("master_loans.customer_id = ? AND transaction_payment_loans.payment_status = ?", nasabahID, status).
-			Scan(&riwayatPembayaran).Error
-	if err != nil {
-			return nil, err
+func (db *historyPembayaranConnection) GetRiwayatPembayaranNasabahById(id uint64) ([]*model.Master_Payment_History, error) {
+		var historyPembayaran []*model.Master_Payment_History
+		err := db.db.Table("master_payment_histories").
+		Select("master_payment_histories.*, master_loans.customer_id, transactions_payment_loans.payment_status").
+		Joins("JOIN transactions_payment_loans ON transactions_payment_loans.id = master_payment_histories.payment_id").
+		Joins("JOIN master_loans ON master_loans.id = master_payment_histories.loan_id").
+		Where("master_payment_histories.id = $1", id).
+		Scan(&historyPembayaran).Error
+		if err != nil {
+		log.Println(err)
+		return nil, err
+		}
+		if historyPembayaran[0].Id == 0 {
+		log.Println("Data tidak ditemukan")
+		return nil, errors.New("Data tidak ditemukan")
+		}
+		return historyPembayaran, nil
 	}
-	return riwayatPembayaran, nil
-}
+
