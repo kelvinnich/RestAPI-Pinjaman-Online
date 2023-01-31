@@ -51,10 +51,7 @@ func (db *pembayaranConnection) CreatePembayaranRepository(pembayaran *model.Tra
 					log.Println(err)
 				}
 			}()
-
-
-
-
+			
 			return nil
 	}); err != nil {
 			return nil, err
