@@ -14,7 +14,7 @@ github.com/mashingan/smapping
 
 ## Installation
 
-* git clone https://github.com/kelvinnich/RestAPI-Pinjaman-Online \n
+* git clone https://github.com/kelvinnich/RestAPI-Pinjaman-Online
 * cd RestAPI-Pinjaman-Online
 * Edit .env
 * Set your database connection details
